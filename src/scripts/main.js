@@ -1,3 +1,18 @@
+class Book {
+  id = crypto.randomUUID();
+
+  constructor(author, title, numberOfPages, isRead = false) {
+    this.author = author;
+    this.title = title;
+    this.numberOfPages = numberOfPages;
+    this.isRead = isRead;
+  }
+
+  toggleStatus() {
+    this.isRead = !this.isRead;
+  }
+}
+
 const myLibrary = [
   new Book('J.K. Rowling', 'Harry Potter and the Sorcerer’s Stone', 309, true),
   new Book('Harper Lee', 'To Kill a Mockingbird', 281, false),
@@ -5,18 +20,6 @@ const myLibrary = [
   new Book('F. Scott Fitzgerald', 'The Great Gatsby', 180, true),
   new Book('J.R.R. Tolkien', 'The Hobbit', 310, false),
 ];
-
-function Book(author, title, numberOfPages, isRead = false) {
-  this.id = crypto.randomUUID();
-  this.author = author;
-  this.title = title;
-  this.numberOfPages = numberOfPages;
-  this.isRead = isRead;
-}
-
-Book.prototype.toggleStatus = function () {
-  this.isRead = !this.isRead;
-};
 
 function addBookToLibrary(author, title, numberOfPages, isRead) {
   myLibrary.push(new Book(author, title, numberOfPages, isRead));
