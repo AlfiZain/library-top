@@ -21,7 +21,7 @@ const myLibrary = [
   new Book('J.R.R. Tolkien', 'The Hobbit', 310, false),
 ];
 
-function addBookToLibrary(author, title, numberOfPages, isRead) {
+function addBookToLibrary({ author, title, numberOfPages, isRead }) {
   myLibrary.push(new Book(author, title, numberOfPages, isRead));
 }
 
@@ -67,23 +67,75 @@ const addBookBtn = document.getElementById('addBookBtn');
 const addBookForm = document.getElementById('addBookForm');
 const addBookDialog = document.getElementById('addBookDialog');
 const cancelBtn = document.getElementById('cancelBtn');
+const formFields = document.querySelectorAll('input, select');
+
+/* Validation */
+function overrideBuiltInMessages(input) {
+  const { validity } = input;
+
+  if (validity.valueMissing) {
+    input.setCustomValidity('Please fill out this field.');
+  } else if (validity.tooLong) {
+    input.setCustomValidity(
+      `Input is too long. Maximum ${input.maxLength} characters.`,
+    );
+  } else if (validity.toShort) {
+    input.setCustomValidity(
+      `Input must be at least ${input.minLength} characters.`,
+    );
+  } else if (validity.rangeUnderflow) {
+    input.setCustomValidity(`Value cannot be less than ${input.min}.`);
+  } else if (validity.rangeOverflow) {
+    input.setCustomValidity(`Value cannot be greater than ${input.max}.`);
+  } else {
+    input.setCustomValidity('');
+  }
+}
+
+function updateFieldUI(input) {
+  const inputGroup = input.closest('.input-group');
+  const errorElement = inputGroup.querySelector('.error-message');
+
+  errorElement.textContent = input.validationMessage;
+}
 
 /* Event Listeners */
 addBookBtn.addEventListener('click', () => {
   addBookDialog.showModal();
 });
 
+formFields.forEach((field) => {
+  field.addEventListener('input', () => {
+    overrideBuiltInMessages(field);
+    updateFieldUI(field);
+  });
+});
+
 addBookForm.addEventListener('submit', (e) => {
   e.preventDefault();
+  let isValid = true;
 
-  const author = document.getElementById('author').value;
-  const title = document.getElementById('title').value;
-  const numberOfPages = Number(document.getElementById('numberOfPages').value);
-  const isRead = document.getElementById('isRead').checked;
+  formFields.forEach((field) => {
+    field.setCustomValidity('');
+    overrideBuiltInMessages(field);
+    updateFieldUI(field);
 
-  if (!author || !title || numberOfPages <= 0) return;
+    if (!field.checkValidity()) {
+      isValid = false;
+    }
+  });
 
-  addBookToLibrary(author, title, numberOfPages, isRead);
+  if (!isValid) return;
+
+  const formData = new FormData(addBookForm);
+  const formObj = {
+    author: formData.get('author'),
+    title: formData.get('title'),
+    numberOfPages: formData.get('numberOfPages'),
+    isRead: formData.has('isRead'),
+  };
+
+  addBookToLibrary(formObj);
   displayBooks();
 
   addBookForm.reset();
