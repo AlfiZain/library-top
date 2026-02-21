@@ -73,7 +73,9 @@ const formFields = document.querySelectorAll('input, select');
 function overrideBuiltInMessages(input) {
   const { validity } = input;
 
-  if (validity.tooLong) {
+  if (validity.valueMissing) {
+    input.setCustomValidity('Please fill out this field.');
+  } else if (validity.tooLong) {
     input.setCustomValidity(
       `Input is too long. Maximum ${input.maxLength} characters.`,
     );
@@ -85,8 +87,6 @@ function overrideBuiltInMessages(input) {
     input.setCustomValidity(`Value cannot be less than ${input.min}.`);
   } else if (validity.rangeOverflow) {
     input.setCustomValidity(`Value cannot be greater than ${input.max}.`);
-  } else if (validity.valueMissing) {
-    input.setCustomValidity('Please fill out this field.');
   } else {
     input.setCustomValidity('');
   }
@@ -113,15 +113,19 @@ formFields.forEach((field) => {
 
 addBookForm.addEventListener('submit', (e) => {
   e.preventDefault();
+  let isValid = true;
 
   formFields.forEach((field) => {
     field.setCustomValidity('');
+    overrideBuiltInMessages(field);
+    updateFieldUI(field);
+
+    if (!field.checkValidity()) {
+      isValid = false;
+    }
   });
 
-  if (!addBookForm.checkValidity()) {
-    formFields.forEach((field) => updateFieldUI(field));
-    return;
-  }
+  if (!isValid) return;
 
   const formData = new FormData(addBookForm);
   const formObj = {
