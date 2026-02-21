@@ -131,9 +131,6 @@ addBookForm.addEventListener('submit', (e) => {
     isRead: formData.has('isRead'),
   };
 
-  console.log(formData);
-  console.log(formObj);
-
   addBookToLibrary(formObj);
   displayBooks();
 
